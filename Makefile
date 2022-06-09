@@ -1,7 +1,7 @@
 GIT_REV?=$$(git rev-parse --short HEAD)
-DATE?=$$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+DATE?=$$(date -u +"%Y-%m-%dT%H:%M:%S")
 VERSION?=$$(git describe --tags --always)
-LDFLAGS="-s -w -X main.version=$(VERSION)-$(GIT_REV) -X main.date=$(DATE)"
+LDFLAGS="-s -w -X main.version=$(VERSION) -X main.sha=$(GIT_REV) -X main.date=$(DATE)"
 goos?=$$(go env GOOS)
 goarch?=$$(go env GOARCH)
 file:=goit
@@ -23,11 +23,11 @@ prepare: ## Download depencies and prepare dev env
 	@go mod vendor
 
 build:  ## Builds the bot binary
-	go build -ldflags=$(LDFLAGS) -o ./bin/$(file) .
+	go build -trimpath -ldflags=$(LDFLAGS) -o ./bin/$(file) .
 
 build-ci: ## Optimized build for CI
 	@echo $(goos)/$(goarch)
-	go build -ldflags=$(LDFLAGS) -o ./bin/$(file) .
+	go build -trimpath -ldflags=$(LDFLAGS) -o ./bin/$(file) .
 	@cp LICENSE bin/LICENSE
 	cd ./bin && tar -czf $(package).tar.gz ./$(file) ./LICENSE && cd ./..
 	@rm bin/LICENSE

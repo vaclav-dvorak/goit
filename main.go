@@ -17,8 +17,9 @@ import (
 const semVerRegex string = `([0-9]+\.[0-9]+\.[0-9])`
 
 type repo struct {
-	path string
-	name string
+	path      string
+	name      string
+	defBranch string
 }
 
 const (
@@ -32,10 +33,10 @@ var (
 			Foreground(lipgloss.Color("63"))
 
 	infoStyle = lipgloss.NewStyle().
-			Width(14).
-			Foreground(lipgloss.Color("202"))
-	version, date = "(devel)", "now"
-	logo          = []string{
+			Width(12).
+			Foreground(lipgloss.Color("63"))
+	version, sha, date = "(devel)", "foo", "now"
+	logo               = []string{
 		`          o`,
 		` __,  __    _|_`,
 		`/  | /  \_|  |`,
@@ -47,7 +48,7 @@ var (
 
 func main() {
 	if _, err := exec.LookPath("git"); err != nil {
-		log.Fatal("we need to have git installed")
+		log.Fatal("we need to have git binary installed")
 	}
 
 	out, err := exec.Command("git", "version").Output()
@@ -59,7 +60,8 @@ func main() {
 	gitVersion := match[0]
 	infoBar := []string{
 		infoStyle.Render("goit v:") + version,
-		infoStyle.Render("build date:") + date,
+		infoStyle.Render("build sha:") + sha,
+		infoStyle.Render("build time:") + date,
 		infoStyle.Render("git v:") + gitVersion,
 	}
 	fmt.Println(lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Render(
@@ -81,6 +83,7 @@ func main() {
 	}
 
 	log.Infof("%v", repos)
+	log.Infof("%d", len(repos))
 }
 
 func getRepos() (repos []repo, err error) {
@@ -89,15 +92,18 @@ func getRepos() (repos []repo, err error) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		if !info.IsDir() {
 			return nil
 		}
-		if info.IsDir() && strings.Count(p, string(os.PathSeparator)) > (baseDepth+maxDepth+1) { // we need +1 depth to be able to found .git directories
-			return nil
+
+		if info.IsDir() && strings.Count(p, string(os.PathSeparator)) > (baseDepth+maxDepth+1) { //* we need +1 depth to be able to found .git directories
+			return filepath.SkipDir
 		}
+
 		if info.Name() == ".git" {
 			dir, _ := path.Split(p)
-			repos = append(repos, repo{path: dir, name: strings.Trim(dir[len(basePath):], string(os.PathSeparator))})
+			repos = append(repos, repo{path: dir, name: strings.Trim(dir[len(basePath):], string(os.PathSeparator)), defBranch: "main"})
 		}
 
 		return nil
