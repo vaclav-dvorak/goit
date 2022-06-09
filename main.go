@@ -2,14 +2,29 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
+	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	log "github.com/sirupsen/logrus"
 )
 
 const semVerRegex string = `([0-9]+\.[0-9]+\.[0-9])`
+
+type repo struct {
+	path string
+	name string
+}
+
+const (
+	maxDepth = 2
+	basePath = "~/work"
+)
 
 var (
 	logoStyle = lipgloss.NewStyle().
@@ -42,7 +57,6 @@ func main() {
 	re := regexp.MustCompile(semVerRegex)
 	match := re.FindStringSubmatch(string(out))
 	gitVersion := match[0]
-	log.Infof("%s", gitVersion)
 	infoBar := []string{
 		infoStyle.Render("goit v:") + version,
 		infoStyle.Render("build date:") + date,
@@ -60,4 +74,33 @@ func main() {
 			),
 		),
 	))
+
+	repos, err := getRepos()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Infof("%v", repos)
+}
+
+func getRepos() (repos []repo, err error) {
+	baseDepth := strings.Count(basePath, string(os.PathSeparator))
+	err = filepath.WalkDir(basePath, func(p string, info fs.DirEntry, err error) error {
+		if err != nil {
+			log.Fatal(err)
+		}
+		if !info.IsDir() {
+			return nil
+		}
+		if info.IsDir() && strings.Count(p, string(os.PathSeparator)) > (baseDepth+maxDepth+1) { // we need +1 depth to be able to found .git directories
+			return nil
+		}
+		if info.Name() == ".git" {
+			dir, _ := path.Split(p)
+			repos = append(repos, repo{path: dir, name: strings.Trim(dir[len(basePath):], string(os.PathSeparator))})
+		}
+
+		return nil
+	})
+	return
 }
