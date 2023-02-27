@@ -1,3 +1,4 @@
+// This is main package
 package main
 
 import (
@@ -36,13 +37,12 @@ var (
 			Width(12).
 			Foreground(lipgloss.Color("63"))
 	version, sha, date = "(devel)", "foo", "now"
-	logo               = []string{
-		`          o`,
-		` __,  __    _|_`,
-		`/  | /  \_|  |`,
-		`\_/|/\__/ |_/|_/`,
-		`  /|`,
-		`  \|`,
+	logo               = []string{ //ascii generator - font "Thin"
+		"          o|",
+		",---.,---..|---",
+		"|   ||   |||",
+		"`---|`---'``---'",
+		"`---'",
 	}
 )
 
