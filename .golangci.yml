@@ -15,9 +15,9 @@ linters:
 
 linters-settings:
   govet:
-    check-shadowing: true
     enable:
       - fieldalignment
+      - shadow
 
 issues:
   exclude-use-default: false
