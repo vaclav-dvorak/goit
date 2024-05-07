@@ -26,6 +26,9 @@ var (
 		"`---'",
 	}
 	logo = logoStyle.Render(strings.Join(logoSlice, "\n"))
+
+	//HeaderHeight - used to calculate ui height
+	HeaderHeight = 7
 )
 
 // Model define structure of header model

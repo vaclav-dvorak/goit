@@ -93,9 +93,9 @@ func (m *Model) onWindowSizeChanged(msg tea.WindowSizeMsg) {
 	m.width = msg.Width
 	m.height = msg.Height
 	// if m.footer.ShowAll {
-	// 	m.MainContentHeight = msg.Height - footer.ExpandedHelpHeight
+	// 	m.MainContentHeight = msg.Height - footer.ExpandedHelpHeight - header.HeaderHeight
 	// } else {
-	// 	m.MainContentHeight = msg.Height - footer.FooterHeight
+	// 	m.MainContentHeight = msg.Height - footer.FooterHeight - header.HeaderHeight
 	// }
 }
 
